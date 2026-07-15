@@ -294,14 +294,86 @@
     border:1px solid var(--border);
     border-radius:10px;
   }
+
+  /* Note from the designer — modal shown on load so reviewers see context first */
+  .designer-note-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(32,36,43,0.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+  }
+  .designer-note-overlay.hidden{ display:none; }
+  .designer-note-card{
+    background:var(--card);
+    border-radius:16px;
+    max-width:640px;
+    width:100%;
+    max-height:85vh;
+    overflow-y:auto;
+    padding:30px 32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.28);
+    position:relative;
+  }
+  .designer-note-card h2{ margin-top:0; font-size:1.3rem; }
+  .designer-note-card h3{ font-size:1rem; margin:18px 0 6px; }
+  .designer-note-card p{ color:var(--sub); font-size:0.9rem; line-height:1.6; margin:0 0 12px; }
+  .designer-note-card .signoff{ color:var(--ink); font-weight:600; margin-top:18px; }
+  .designer-note-card .close-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    background:none;
+    border:none;
+    font-size:1.4rem;
+    line-height:1;
+    cursor:pointer;
+    color:var(--sub);
+    padding:4px 8px;
+    border-radius:6px;
+  }
+  .designer-note-card .close-btn:hover{ background:#f0ede6; }
+  .designer-note-reopen{
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--ink);
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:0.78rem;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .designer-note-reopen:hover{ background:#f0ede6; }
 </style>
 </head>
 <body>
+
+<div class="designer-note-overlay" id="designer-note-overlay">
+  <div class="designer-note-card">
+    <button class="close-btn" id="designer-note-close" aria-label="Close note">&times;</button>
+    <h2>A note from the designer</h2>
+    <p>Hi — I'm Gabi Perez. This is a demo project I built for my Claude Corps Fellowship application.</p>
+
+    <h3>What this dashboard is</h3>
+    <p>When I first sketched out Project Borderlands, I drew its three spaces — Physical, Digital, Coalition — as a cycle: what happens on the land feeds the stories that go online, and what grows online should be able to pull people back into the room. That diagram is in the original proposal. This dashboard is the first real attempt at actually building that.</p>
+    <p>It's a demo, not a finished product. Some of what's in it is real, pulled straight from the proposal: the founding coalition, the local partner organizations, the Learning Lab concepts, the project's goals. Some of it is placeholder data, clearly labeled as such throughout the app — sample coalition contacts named after native Pacific Northwest flora and fauna, and made-up content performance numbers standing in for analytics that don't exist yet because nothing has launched. I built it this way on purpose: to show what the tool would look like and how it would work, without pretending the program is further along than it is.</p>
+
+    <h3>The honest part</h3>
+    <p>This is quite literally what I had in mind when I first started working on Project Borderlands — a way to hold the physical, digital, and coalition work in one place instead of scattered across a proposal doc, a Google Drive, and my own head. I didn't have the technical background to build it back then. Working through this with Claude is what closed that gap: I went from a diagram on a page to something you can actually click through, in about as long as it would've taken me to just describe the idea to someone else. If I'd had this kind of tool when I was first drafting the project, I think it would have moved a lot faster and a lot further. That's a real part of why I'm applying.</p>
+
+    <p class="signoff">— Gabi</p>
+    <p style="font-size:0.78rem;">Full write-up, including the file-by-file breakdown, is in <code>README.md</code> in this repo.</p>
+  </div>
+</div>
 
 <header>
   <h1>Project Borderlands — Community Dashboard</h1>
   <p>A working view into the three interconnected spaces of the initiative — Physical, Digital, and Coalition — pulling from cleaned program data, a live weather feed, a Google Form/Sheet intake pipeline, and a Claude-powered planning assistant.</p>
   <div class="meta-line" id="meta-line">Loading dataset…</div>
+  <button class="designer-note-reopen" id="designer-note-reopen">📝 Note from the designer</button>
 </header>
 
 <nav id="tabs">
@@ -490,12 +562,12 @@
   // Published Google Sheet CSV link (Google Form -> Sheet -> "Publish to web" -> CSV).
   // See SETUP_GUIDE.md for the 5-minute setup. Leave blank to show the
   // "not connected" placeholder state.
-  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOuT2256qywieUchNWNDlHPS4IOWsuUvh0YpX89ouQOkPrEu0phMWhOq3DPilSwsK4Hz1srpUW-fOY/pubhtml?gid=288036713&single=true";
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOuT2256qywieUchNWNDlHPS4IOWsuUvh0YpX89ouQOkPrEu0phMWhOq3DPilSwsK4Hz1srpUW-fOY/pub?output=csv";
 
   // Embeddable Google Form URL for "vote on date/time & commit to a role"
   // (Form URL -> replace /viewform with /viewform?embedded=true). Leave
   // blank to show the "not connected" placeholder state.
-  const LEARNING_LAB_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScIHJSIpdZblg2UVet0j6XYpMzLUkFQtFxcwbKovAGLUJd2lw/viewform?usp=sharing&ouid=112413421050690270475";
+  const LEARNING_LAB_FORM_URL = "";
 
   // Social links — placeholders until real accounts launch. Email is real.
   const SOCIAL_LINKS = {
@@ -508,6 +580,20 @@
 
   const PHYSICAL_LAT = 48.2199;
   const PHYSICAL_LON = -122.6857;
+
+  // ---------------------------------------------------------------------
+  // Note from the designer (modal shown on load, reopenable from the header)
+  // ---------------------------------------------------------------------
+  const designerNoteOverlay = document.getElementById('designer-note-overlay');
+  document.getElementById('designer-note-close').addEventListener('click', () => {
+    designerNoteOverlay.classList.add('hidden');
+  });
+  document.getElementById('designer-note-reopen').addEventListener('click', () => {
+    designerNoteOverlay.classList.remove('hidden');
+  });
+  designerNoteOverlay.addEventListener('click', (e) => {
+    if (e.target === designerNoteOverlay) designerNoteOverlay.classList.add('hidden');
+  });
 
   // ---------------------------------------------------------------------
   // Tabs
