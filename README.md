@@ -57,17 +57,7 @@ think it would have moved a lot faster and a lot further. That's a real
 part of why I'm applying — I want to keep having that kind of leverage, and
 I want to help build it for other people doing this kind of work too.
 </p>
-<h2>Quick start</h2>
-<pre><code># clone the repo, then from inside it:
-python3 clean_merge_data.py       # (optional) regenerate borderlands_data.json
-python3 -m http.server 8000       # serve the folder locally
-</code></pre>
-<p>Then open <code>http://localhost:8000</code> in your browser.</p>
-<p>
-For deploying it as a live URL (GitHub Pages, Netlify) and connecting the
-Google Form/Sheet and Claude chat pieces, see
-<a href="./SETUP_GUIDE.md"><code>SETUP_GUIDE.md</code></a>.
-</p>
+
 <h2>What's in this repo</h2>
 <table>
   <thead>
