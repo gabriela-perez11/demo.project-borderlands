@@ -1,0 +1,288 @@
+{
+  "generated_at": "2026-07-15T19:53:24.600523+00:00",
+  "founding_coalition": [
+    {
+      "name": "Gabi Perez",
+      "role": "Founder",
+      "org": "Project Borderlands",
+      "bio_short": "Community organizer & storyteller weaving digital storytelling with place-based practice."
+    },
+    {
+      "name": "Stephanie Nestlerode",
+      "role": "Systems Strategist",
+      "org": "7th Generation Labs",
+      "bio_short": "40+ years in organizational and civic transformation, guided by Indigenous wisdom teachings."
+    },
+    {
+      "name": "Tony Cladusbid",
+      "role": "Coast Salish Knowledge Keeper",
+      "org": "sw\u0259d\u0259b\u0161 Cultural Center / Beaver Tales Coffee",
+      "bio_short": "Swinomish Native, Coast Salish canoe builder, artist, and storyteller."
+    },
+    {
+      "name": "Michelle Cladusbid",
+      "role": "Community Weaver",
+      "org": "sw\u0259d\u0259b\u0161 Cultural Center / Beaver Tales Coffee",
+      "bio_short": "Holds space for allyship and creative gatherings rooted in humility and reciprocity."
+    }
+  ],
+  "local_orgs": [
+    {
+      "name": "s\u02b7\u0259d\u0259b\u0161 Cultural Center and Creative Hub",
+      "location": "Coupeville, WA"
+    },
+    {
+      "name": "The Swinomish Youth and Community Center",
+      "location": "La Conner, WA"
+    },
+    {
+      "name": "Children of the Setting Sun",
+      "location": "Salish Sea region, WA"
+    }
+  ],
+  "coalition_contacts": [
+    {
+      "name": "Cedar Raven",
+      "handle": null,
+      "role": "writer/filmmaker/indigenous/post-production",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact \u2014 a writer/filmmaker profile, not a real person.",
+      "locality_status": "confirmed_local",
+      "region": "Whidbey Island",
+      "discovery_channel": "Word of mouth",
+      "tags": [
+        "journalist",
+        "lawyer"
+      ]
+    },
+    {
+      "name": "Chinook Rising",
+      "handle": null,
+      "role": "filmmaker/indigenous/post-production",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact \u2014 a filmmaker profile, not a real person.",
+      "locality_status": "possibly_local",
+      "region": "Puget Sound",
+      "discovery_channel": "Facebook",
+      "tags": [
+        "filmmaker",
+        "environmental expert"
+      ]
+    },
+    {
+      "name": "Osprey Wing",
+      "handle": null,
+      "role": "filmmaker",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact \u2014 a filmmaker profile, not a real person.",
+      "locality_status": "confirmed_local",
+      "region": "Whidbey Island",
+      "discovery_channel": "Monthly gatherings",
+      "tags": [
+        "filmmaker",
+        "educator"
+      ]
+    },
+    {
+      "name": "Huckleberry Moon",
+      "handle": "filmbyhuckleberry",
+      "role": "director/editor",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact \u2014 a director/editor profile, not a real person.",
+      "locality_status": "confirmed_local",
+      "region": "Whidbey Island",
+      "discovery_channel": "Coupeville Arts Center",
+      "tags": [
+        "filmmaker",
+        "baker"
+      ]
+    },
+    {
+      "name": "Sword Fern Walker",
+      "handle": "fernwalker_",
+      "role": "artist/storyteller/illustrator",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact \u2014 an artist/illustrator profile, not a real person.",
+      "locality_status": "possibly_local",
+      "region": "Puget Sound",
+      "discovery_channel": "TikTok",
+      "tags": [
+        "artist",
+        "educator"
+      ]
+    },
+    {
+      "name": "Salal Bloom",
+      "handle": null,
+      "role": "filmmaker/advocate",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact \u2014 a filmmaker/advocate profile, not a real person.",
+      "locality_status": "unknown",
+      "region": null,
+      "discovery_channel": "TikTok",
+      "tags": [
+        "filmmaker",
+        "community weaver"
+      ]
+    },
+    {
+      "name": "Madrona Grove",
+      "handle": "madrona.grove",
+      "role": "creator",
+      "about": "PLACEHOLDER ENTRY. Illustrative stand-in for a future coalition contact.",
+      "locality_status": "unknown",
+      "region": null,
+      "discovery_channel": "Facebook",
+      "tags": [
+        "online citizen",
+        "gardener"
+      ]
+    }
+  ],
+  "coalition_stats": {
+    "total_contacts": 7,
+    "by_locality_status": {
+      "confirmed_local": 3,
+      "possibly_local": 2,
+      "unknown": 2
+    },
+    "by_discovery_channel": {
+      "Word of mouth": 1,
+      "Facebook": 2,
+      "Monthly gatherings": 1,
+      "Coupeville Arts Center": 1,
+      "TikTok": 2
+    },
+    "top_tags": [
+      {
+        "tag": "filmmaker",
+        "count": 4
+      },
+      {
+        "tag": "educator",
+        "count": 2
+      },
+      {
+        "tag": "journalist",
+        "count": 1
+      },
+      {
+        "tag": "lawyer",
+        "count": 1
+      },
+      {
+        "tag": "environmental expert",
+        "count": 1
+      },
+      {
+        "tag": "baker",
+        "count": 1
+      },
+      {
+        "tag": "artist",
+        "count": 1
+      },
+      {
+        "tag": "community weaver",
+        "count": 1
+      },
+      {
+        "tag": "online citizen",
+        "count": 1
+      },
+      {
+        "tag": "gardener",
+        "count": 1
+      }
+    ]
+  },
+  "total_coalition_members": 40,
+  "coalition_note": "The Borderlands coalition currently has 40 members. The contact table below shows a small set of PLACEHOLDER sample entries (named after native Pacific Northwest flora and fauna) to demonstrate how the data pipeline structures and cleans contact data \u2014 it is not the full roster.",
+  "learning_lab_pilot_concepts": [
+    {
+      "title": "Intergenerational Cooking Circles",
+      "desc": "A Native grandmother and a non-Indigenous grandmother cook together and exchange ancestral food stories."
+    },
+    {
+      "title": "Child-Led Storytelling Hikes",
+      "desc": "Connect land, imagination, nature literacy, and place-based learning."
+    },
+    {
+      "title": "Elder\u2013Youth Roundtables",
+      "desc": "Indigenous and non-Indigenous elders and youth share memory and relational knowledge across generations."
+    },
+    {
+      "title": "Rewilding a Public Plot",
+      "desc": "Community teams tend, observe, and document Indigenous planting methods over time."
+    },
+    {
+      "title": "Animated Indigenous Legends",
+      "desc": "Screenings of animated Indigenous stories followed by facilitated question circles for children and families."
+    },
+    {
+      "title": "Youth-Designed Cultural Celebrations",
+      "desc": "Youth-designed, adult-supported events centering cross-cultural exchange and joyful connection."
+    }
+  ],
+  "physical_locations": [
+    {
+      "name": "Beaver Tales Coffee / sw\u0259d\u0259b\u0161 Cultural Center",
+      "type": "Learning Lab host site",
+      "lat": 48.2199,
+      "lon": -122.6857
+    },
+    {
+      "name": "Swinomish Youth and Community Center",
+      "type": "Coalition partner",
+      "lat": 48.396,
+      "lon": -122.4993
+    },
+    {
+      "name": "Salish Sea Pilot Region",
+      "type": "Program region",
+      "lat": 48.3,
+      "lon": -122.6
+    }
+  ],
+  "digital_platforms": [
+    "TikTok",
+    "Instagram",
+    "Facebook",
+    "YouTube"
+  ],
+  "demo_content_metrics": [
+    {
+      "platform": "TikTok",
+      "title": "Learning Lab teaser \u2014 Cooking Circle",
+      "views": 1240,
+      "likes": 310,
+      "comments": 42,
+      "shares": 58
+    },
+    {
+      "platform": "Instagram",
+      "title": "Elder-youth roundtable clip",
+      "views": 860,
+      "likes": 190,
+      "comments": 21,
+      "shares": 15
+    },
+    {
+      "platform": "Facebook",
+      "title": "Rewilding day recap",
+      "views": 430,
+      "likes": 75,
+      "comments": 9,
+      "shares": 22
+    },
+    {
+      "platform": "YouTube",
+      "title": "Full Learning Lab short documentary",
+      "views": 2100,
+      "likes": 340,
+      "comments": 51,
+      "shares": 40
+    }
+  ],
+  "goals": [
+    "Strengthen cross-cultural relationships",
+    "Protect and uplift Indigenous knowledge and ways of knowing",
+    "Use storytelling as a catalyst for transformation",
+    "Build collective capacity for social and political action",
+    "Regenerate connection to people, place, and land"
+  ]
+}

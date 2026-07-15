@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project Borderlands — Community Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Note: charts are hand-built with plain HTML/CSS below (no Chart.js) so the
+     dashboard can't break from a charting-library CDN failure. Leaflet is the
+     only external script dependency, used for the map only. -->
+<style>
+  :root{
+    --physical:#3f7d5c;
+    --physical-light:#eaf4ee;
+    --digital:#6a4fb3;
+    --digital-light:#f0ecfa;
+    --coalition:#d98a34;
+    --coalition-light:#fdf1e2;
+    --ink:#20242b;
+    --sub:#5c6470;
+    --bg:#faf9f6;
+    --card:#ffffff;
+    --border:#e6e2da;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+  }
+  header{
+    padding:28px 24px 20px;
+    background:linear-gradient(120deg,var(--physical-light),var(--digital-light) 55%,var(--coalition-light));
+    border-bottom:1px solid var(--border);
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:1.7rem;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--sub);
+    font-size:0.95rem;
+    max-width:720px;
+  }
+  .meta-line{
+    margin-top:10px;
+    font-size:0.78rem;
+    color:var(--sub);
+  }
+  nav{
+    display:flex;
+    gap:6px;
+    padding:10px 24px;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  nav button{
+    border:1px solid var(--border);
+    background:var(--bg);
+    color:var(--ink);
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:0.85rem;
+    cursor:pointer;
+    transition:0.15s;
+  }
+  nav button:hover{ background:#f0ede6; }
+  nav button.active{
+    background:var(--ink);
+    color:white;
+    border-color:var(--ink);
+  }
+  main{
+    max-width:1080px;
+    margin:0 auto;
+    padding:24px;
+  }
+  section.panel{ display:none; }
+  section.panel.active{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  h2.space-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.3rem;
+    margin:0 0 4px;
+  }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .dot.physical{ background:var(--physical); }
+  .dot.digital{ background:var(--digital); }
+  .dot.coalition{ background:var(--coalition); }
+  .space-sub{ color:var(--sub); font-size:0.9rem; margin:0 0 20px; }
+
+  .grid{ display:grid; gap:16px; }
+  .grid.cols-2{ grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
+  .grid.cols-3{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+  }
+  .card h3{ margin:0 0 6px; font-size:1rem; }
+  .card p{ margin:0; color:var(--sub); font-size:0.88rem; }
+
+  .stat{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+    text-align:center;
+  }
+  .stat .num{ font-size:1.8rem; font-weight:700; }
+  .stat .label{ font-size:0.78rem; color:var(--sub); text-transform:uppercase; letter-spacing:0.03em; }
+
+  table{ width:100%; border-collapse:collapse; font-size:0.85rem; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th{ color:var(--sub); font-weight:600; font-size:0.75rem; text-transform:uppercase; }
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:0.72rem;
+    font-weight:600;
+  }
+  .badge.confirmed_local{ background:#e2f4e8; color:#2a7a4a; }
+  .badge.possibly_local{ background:#fdf1d8; color:#96690b; }
+  .badge.not_local{ background:#fbe7e7; color:#a13a3a; }
+  .badge.unknown{ background:#eee; color:#777; }
+  .tag{
+    display:inline-block;
+    background:var(--digital-light);
+    color:var(--digital);
+    padding:2px 8px;
+    border-radius:6px;
+    font-size:0.72rem;
+    margin:0 4px 4px 0;
+  }
+
+  #map{ height:320px; border-radius:12px; border:1px solid var(--border); margin-top:14px; }
+
+  .weather-box{
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .weather-box .big{ font-size:2.2rem; font-weight:700; }
+  .weather-box .sub{ color:var(--sub); font-size:0.85rem; }
+
+  input[type=text], input[type=password], textarea{
+    width:100%;
+    padding:9px 11px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:0.88rem;
+    font-family:inherit;
+  }
+  button.primary{
+    background:var(--ink);
+    color:white;
+    border:none;
+    padding:9px 16px;
+    border-radius:8px;
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  button.primary:disabled{ opacity:0.5; cursor:not-allowed; }
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--border);
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:0.8rem;
+    cursor:pointer;
+  }
+
+  .chat-log{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    height:280px;
+    overflow-y:auto;
+    background:#fcfbf9;
+    font-size:0.88rem;
+    margin-bottom:10px;
+  }
+  .chat-msg{ margin-bottom:12px; }
+  .chat-msg .who{ font-weight:700; font-size:0.75rem; text-transform:uppercase; color:var(--sub); margin-bottom:2px; }
+  .chat-msg.user .who{ color:var(--physical); }
+  .chat-msg.assistant .who{ color:var(--digital); }
+  .chat-msg .body{ white-space:pre-wrap; }
+  .notice{
+    font-size:0.8rem;
+    color:var(--sub);
+    background:#f4f2ec;
+    border:1px dashed var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:14px;
+  }
+  .flex-row{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+  .flex-row > div{ flex:1; min-width:180px; }
+  footer{
+    text-align:center;
+    padding:30px 20px 50px;
+    color:var(--sub);
+    font-size:0.78rem;
+  }
+
+  /* Dependency-free bar charts (plain HTML/CSS, no chart library) */
+  .barlist .bar-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+    font-size:0.85rem;
+  }
+  .barlist .bar-label{
+    width:130px;
+    flex:0 0 130px;
+    color:var(--sub);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .barlist .bar-track{
+    flex:1;
+    background:#f0ede6;
+    border-radius:6px;
+    height:14px;
+    overflow:hidden;
+  }
+  .barlist .bar-fill{
+    height:100%;
+    border-radius:6px;
+    min-width:3px;
+  }
+  .barlist .bar-count{
+    width:26px;
+    text-align:right;
+    font-weight:600;
+    flex:0 0 26px;
+  }
+  .stackbar{
+    display:flex;
+    width:100%;
+    height:22px;
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:12px;
+    border:1px solid var(--border);
+  }
+  .stackbar-seg{ height:100%; }
+  .legend{ display:flex; flex-wrap:wrap; gap:12px; font-size:0.8rem; color:var(--sub); }
+  .legend .swatch{ width:10px; height:10px; border-radius:3px; display:inline-block; margin-right:6px; vertical-align:middle; }
+  .placeholder-banner{
+    background:#fdf1d8;
+    border:1px solid #eccf8f;
+    color:#7a5a10;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:0.82rem;
+    margin-bottom:16px;
+  }
+  .connect-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 14px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:var(--bg);
+    color:var(--ink);
+    text-decoration:none;
+    font-size:0.85rem;
+  }
+  .connect-btn:hover{ background:#f0ede6; }
+  .connect-btn.disabled{ opacity:0.5; pointer-events:none; }
+  iframe.lab-form{
+    width:100%;
+    height:640px;
+    border:1px solid var(--border);
+    border-radius:10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Project Borderlands — Community Dashboard</h1>
+  <p>A working view into the three interconnected spaces of the initiative — Physical, Digital, and Coalition — pulling from cleaned program data, a live weather feed, a Google Form/Sheet intake pipeline, and a Claude-powered planning assistant.</p>
+  <div class="meta-line" id="meta-line">Loading dataset…</div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="physical">🌲 Physical Space</button>
+  <button data-tab="digital">📱 Digital Space</button>
+  <button data-tab="coalition">🤝 Coalition Space</button>
+  <button data-tab="assistant">💬 Ask Borderlands AI</button>
+</nav>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <section class="panel active" id="panel-overview">
+    <h2 class="space-title">Overview</h2>
+    <p class="space-sub">Project Borderlands moves through three interconnected spaces. This dashboard exists to keep them legible to each other — what happens on the land shows up in the data that gets shared online, and what grows online should be able to feed back into who shows up in person.</p>
+
+    <div class="grid cols-3" id="overview-stats"></div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Guiding Goals</h3>
+      <ul id="goals-list" style="margin:8px 0 0; padding-left:18px; color:var(--sub); font-size:0.88rem;"></ul>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Founding Coalition</h3>
+      <div class="grid cols-2" id="founders-grid" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <!-- PHYSICAL -->
+  <section class="panel" id="panel-physical">
+    <h2 class="space-title"><span class="dot physical"></span>Physical Space</h2>
+    <p class="space-sub">Where communities gather: Learning Labs, co-led with a Native community member from the land where each one takes place.</p>
+
+    <div class="card">
+      <h3>Pilot Learning Lab concepts</h3>
+      <div class="grid cols-3" id="labs-grid" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Vote on a date/time &amp; commit to a role</h3>
+      <p style="margin-bottom:10px;">Viewers can vote on which dates/times work for an upcoming Learning Lab and volunteer for a role (setup, food, photography, translation, outreach, cleanup). This embeds a Google Form — see <code>SETUP_GUIDE.md</code> to connect your own in a few minutes.</p>
+      <div id="lab-form-box" class="notice">Form not connected yet. Set <code>LEARNING_LAB_FORM_URL</code> near the top of the script block to your Google Form's embed link.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Learning Lab sign-up interest (live from Google Sheet)</h3>
+      <p style="margin-bottom:10px;">This reads a published Google Sheet CSV that the form above feeds automatically — see <code>SETUP_GUIDE.md</code> to connect your own. Until connected, it shows the not-configured state below.</p>
+      <div id="rsvp-box" class="notice">Google Sheet not connected yet. Set <code>SHEET_CSV_URL</code> near the top of the script block to your published sheet link.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Live conditions — Beaver Tales / swədəbš Cultural Center, Whidbey Island</h3>
+      <p style="margin-bottom:10px;">Pulled live from the Open-Meteo weather API — useful for planning outdoor Learning Labs (hikes, plantings, gatherings).</p>
+      <div class="weather-box" id="weather-box">Loading current conditions…</div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Learning Lab &amp; partner locations</h3>
+      <div id="map"></div>
+    </div>
+  </section>
+
+  <!-- DIGITAL -->
+  <section class="panel" id="panel-digital">
+    <h2 class="space-title"><span class="dot digital"></span>Digital Space</h2>
+    <p class="space-sub">Where stories are created and travel — and, right now, where the Coalition itself is being found and built.</p>
+
+    <div class="card">
+      <h3>Connect with us</h3>
+      <p style="margin-bottom:10px;">Social links are config-driven placeholders until real accounts launch — see <code>SETUP_GUIDE.md</code>. Email is real and live.</p>
+      <div id="connect-links" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Sample content performance <span style="font-weight:400; color:var(--sub); font-size:0.78rem;">(placeholder demo data)</span></h3>
+      <p style="margin-bottom:10px;">Filler numbers showing what content tracking will look like once Learning Lab stories are actually posted — not real analytics yet.</p>
+      <div style="overflow-x:auto;">
+        <table id="metrics-table">
+          <thead><tr><th>Platform</th><th>Sample post</th><th>Views</th><th>Likes</th><th>Comments</th><th>Shares</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="placeholder-banner" id="digital-placeholder-note"></div>
+
+    <div class="card">
+      <h3>How coalition contacts were found</h3>
+      <div class="barlist" id="channel-chart"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Planned distribution platforms</h3>
+      <div id="platforms-list" style="margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- COALITION -->
+  <section class="panel" id="panel-coalition">
+    <h2 class="space-title"><span class="dot coalition"></span>Coalition Space</h2>
+    <p class="space-sub">The living network of storytellers, filmmakers, and partner organizations — cleaned and merged from raw outreach notes.</p>
+
+    <div class="grid cols-3" id="coalition-stats" style="margin-bottom:16px;"></div>
+
+    <div class="placeholder-banner" id="coalition-placeholder-note"></div>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Locality status of sample contacts</h3>
+        <div id="locality-chart"></div>
+      </div>
+      <div class="card">
+        <h3>Local partner organizations</h3>
+        <div id="orgs-list" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Skills &amp; roles represented in the coalition</h3>
+      <p style="margin-bottom:10px;">The kind of expertise a healthy coalition needs on hand — legal, editorial, creative, and hands-on.</p>
+      <div class="barlist" id="tags-chart"></div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>Sample coalition contacts (cleaned from raw outreach data — placeholder entries)</h3>
+      <div style="overflow-x:auto;">
+        <table id="contacts-table">
+          <thead>
+            <tr><th>Name</th><th>Role</th><th>Locality</th><th>Found via</th><th>Tags</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASSISTANT -->
+  <section class="panel" id="panel-assistant">
+    <h2 class="space-title">💬 Ask Borderlands AI</h2>
+    <p class="space-sub">A Claude-powered assistant scoped to Project Borderlands — ask it to draft a Learning Lab session outline, tighten a story treatment, or brainstorm outreach language.</p>
+
+    <div class="notice">
+      This calls the real Anthropic API directly from your browser using a key you provide below. The key is kept only in this page's memory for the current session — it is never saved, sent anywhere else, or written to disk. Get a key at <strong>console.anthropic.com</strong>. This pattern is for demos/prototyping; a production version would route through a small backend instead of exposing the key client-side.
+    </div>
+
+    <div class="flex-row" style="margin-bottom:14px;">
+      <div>
+        <label style="font-size:0.8rem; color:var(--sub);">Anthropic API key</label>
+        <input type="password" id="api-key" placeholder="sk-ant-..." />
+      </div>
+      <div style="flex:0 0 auto;">
+        <button class="ghost" id="clear-key">Clear key</button>
+      </div>
+    </div>
+
+    <div class="chat-log" id="chat-log">
+      <div class="chat-msg assistant">
+        <div class="who">Borderlands AI</div>
+        <div class="body">Hi — I'm scoped to help with Project Borderlands: Learning Lab session plans, story treatment ideas, outreach messages, and grounding questions. Add your API key above, then ask me something.</div>
+      </div>
+    </div>
+
+    <div class="flex-row">
+      <div>
+        <textarea id="chat-input" rows="2" placeholder="e.g. Draft a 90-minute outline for the Intergenerational Cooking Circle Learning Lab"></textarea>
+      </div>
+      <div style="flex:0 0 auto;">
+        <button class="primary" id="chat-send">Send</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Project Borderlands Community Dashboard — built by Gabi Perez. Data pipeline: <code>clean_merge_data.py</code> → <code>borderlands_data.json</code>. Live integrations: Open-Meteo weather API, Google Sheets CSV export, Anthropic Claude API.
+</footer>
+
+<script>
+  // ---------------------------------------------------------------------
+  // CONFIG — fill these in to wire up the live workflows.
+  // ---------------------------------------------------------------------
+
+  // Published Google Sheet CSV link (Google Form -> Sheet -> "Publish to web" -> CSV).
+  // See SETUP_GUIDE.md for the 5-minute setup. Leave blank to show the
+  // "not connected" placeholder state.
+  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOuT2256qywieUchNWNDlHPS4IOWsuUvh0YpX89ouQOkPrEu0phMWhOq3DPilSwsK4Hz1srpUW-fOY/pub?output=csv";
+
+  // Embeddable Google Form URL for "vote on date/time & commit to a role"
+  // (Form URL -> replace /viewform with /viewform?embedded=true). Leave
+  // blank to show the "not connected" placeholder state.
+  const LEARNING_LAB_FORM_URL = "";
+
+  // Social links — placeholders until real accounts launch. Email is real.
+  const SOCIAL_LINKS = {
+    TikTok: "",
+    Instagram: "",
+    Facebook: "",
+    YouTube: "",
+    Email: "mailto:gabiperez1115@gmail.com",
+  };
+
+  const PHYSICAL_LAT = 48.2199;
+  const PHYSICAL_LON = -122.6857;
+
+  // ---------------------------------------------------------------------
+  // Tabs
+  // ---------------------------------------------------------------------
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('section.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------------------------------------------------------------------
+  // Load merged dataset (output of clean_merge_data.py)
+  // ---------------------------------------------------------------------
+  fetch('borderlands_data.json')
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .catch(err => {
+      document.getElementById('meta-line').textContent =
+        'Could not load borderlands_data.json (' + err.message + '). If you opened this file directly, run "python3 -m http.server" in this folder and open it via http://localhost:8000 instead.';
+      throw err; // stop here — nothing to render without the dataset
+    })
+    .then(renderAll)
+    .catch(err => {
+      // A dataset-load error already showed its own message above; this
+      // branch only fires for a *rendering* error (e.g. a CDN script for
+      // Chart.js/Leaflet failed to load), so say that instead of blaming
+      // the JSON, which would be misleading.
+      if (!/^HTTP |^Failed to fetch/.test(err.message)) {
+        console.error(err);
+        document.getElementById('meta-line').textContent =
+          'Dataset loaded, but part of the page failed to render (' + err.message + '). This usually means a CDN script (Chart.js or Leaflet) didn\'t load — check your network/ad-blocker and reload.';
+      }
+    });
+
+  function renderAll(data){
+    document.getElementById('meta-line').textContent =
+      'Dataset last generated ' + new Date(data.generated_at).toLocaleString() +
+      ' · ' + data.coalition_stats.total_contacts + ' coalition contacts · ' +
+      data.founding_coalition.length + ' founding members';
+
+    const renderers = [renderOverview, renderPhysical, renderDigital, renderCoalition];
+    renderers.forEach(fn => {
+      try { fn(data); }
+      catch (err) { console.error(fn.name + ' failed:', err); }
+    });
+  }
+
+  // Simple, dependency-free bar chart renderer (plain HTML/CSS, no library).
+  const BAR_COLORS = ['#6a4fb3', '#8f7bcf', '#3f7d5c', '#d98a34', '#c0524f', '#5c6470'];
+  function renderBarList(containerId, items){
+    const max = Math.max(1, ...items.map(i => i.count));
+    const el = document.getElementById(containerId);
+    el.innerHTML = items.map((item, i) => `
+      <div class="bar-row">
+        <div class="bar-label" title="${item.label}">${item.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(item.count / max) * 100}%; background:${item.color || BAR_COLORS[i % BAR_COLORS.length]};"></div></div>
+        <div class="bar-count">${item.count}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderOverview(data){
+    const statsEl = document.getElementById('overview-stats');
+    const stats = [
+      { num: data.founding_coalition.length, label: 'Founding members' },
+      { num: data.total_coalition_members, label: 'Coalition members total' },
+      { num: data.local_orgs.length, label: 'Local partner orgs' },
+      { num: data.learning_lab_pilot_concepts.length, label: 'Pilot lab concepts' },
+      { num: data.digital_platforms.length, label: 'Distribution platforms' },
+    ];
+    statsEl.innerHTML = stats.map(s =>
+      `<div class="stat"><div class="num">${s.num}</div><div class="label">${s.label}</div></div>`
+    ).join('');
+
+    document.getElementById('goals-list').innerHTML =
+      data.goals.map(g => `<li>${g}</li>`).join('');
+
+    document.getElementById('founders-grid').innerHTML =
+      data.founding_coalition.map(f => `
+        <div class="card">
+          <h3>${f.name}</h3>
+          <p><strong>${f.role}</strong> · ${f.org}</p>
+          <p style="margin-top:6px;">${f.bio_short}</p>
+        </div>
+      `).join('');
+  }
+
+  function renderPhysical(data){
+    // Learning Lab concept cards
+    document.getElementById('labs-grid').innerHTML =
+      data.learning_lab_pilot_concepts.map(l => `
+        <div class="card">
+          <h3>${l.title}</h3>
+          <p>${l.desc}</p>
+        </div>
+      `).join('');
+
+    // Map
+    const map = L.map('map').setView([PHYSICAL_LAT, PHYSICAL_LON], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    data.physical_locations.forEach(loc => {
+      L.marker([loc.lat, loc.lon]).addTo(map)
+        .bindPopup(`<strong>${loc.name}</strong><br>${loc.type}`);
+    });
+
+    // Live weather
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${PHYSICAL_LAT}&longitude=${PHYSICAL_LON}&current=temperature_2m,wind_speed_10m,weather_code,precipitation&temperature_unit=fahrenheit&wind_speed_unit=mph`)
+      .then(r => r.json())
+      .then(w => {
+        const c = w.current;
+        document.getElementById('weather-box').innerHTML = `
+          <div>
+            <div class="big">${Math.round(c.temperature_2m)}°F</div>
+            <div class="sub">Temperature</div>
+          </div>
+          <div>
+            <div class="big">${Math.round(c.wind_speed_10m)} mph</div>
+            <div class="sub">Wind</div>
+          </div>
+          <div>
+            <div class="big">${c.precipitation}"</div>
+            <div class="sub">Precipitation</div>
+          </div>
+          <div class="sub">Live via Open-Meteo, as of ${new Date(c.time).toLocaleString()}</div>
+        `;
+      })
+      .catch(() => {
+        document.getElementById('weather-box').textContent = 'Weather API unavailable right now.';
+      });
+
+    // RSVP / Google Sheet workflow
+    const rsvpBox = document.getElementById('rsvp-box');
+    if (SHEET_CSV_URL) {
+      fetch(SHEET_CSV_URL)
+        .then(r => r.text())
+        .then(csvText => {
+          const rows = csvText.trim().split('\n').filter(r => r.trim().length > 0);
+          const count = Math.max(rows.length - 1, 0); // minus header
+          rsvpBox.classList.remove('notice');
+          rsvpBox.innerHTML = `<div class="stat" style="display:inline-block;"><div class="num">${count}</div><div class="label">Sign-ups via Google Form</div></div>`;
+        })
+        .catch(() => {
+          rsvpBox.textContent = 'Could not load the connected Google Sheet — check that it is published to the web as CSV.';
+        });
+    }
+
+    // Learning Lab date/role Google Form embed
+    const labFormBox = document.getElementById('lab-form-box');
+    if (LEARNING_LAB_FORM_URL) {
+      labFormBox.classList.remove('notice');
+      labFormBox.innerHTML = `<iframe class="lab-form" src="${LEARNING_LAB_FORM_URL}">Loading form…</iframe>`;
+    }
+  }
+
+  const SOCIAL_ICONS = { TikTok:'🎵', Instagram:'📷', Facebook:'📘', YouTube:'▶️', Email:'✉️' };
+
+  function renderDigital(data){
+    // Connect With Us links (config-driven; email is always real/live)
+    document.getElementById('connect-links').innerHTML =
+      Object.entries(SOCIAL_LINKS).map(([platform, url]) => {
+        const icon = SOCIAL_ICONS[platform] || '🔗';
+        if (url) {
+          return `<a class="connect-btn" href="${url}" target="_blank" rel="noopener">${icon} ${platform}</a>`;
+        }
+        return `<span class="connect-btn disabled" title="Add a link in SOCIAL_LINKS config">${icon} ${platform} (not connected)</span>`;
+      }).join('');
+
+    // Sample content performance (placeholder demo data)
+    const metricsBody = document.querySelector('#metrics-table tbody');
+    metricsBody.innerHTML = data.demo_content_metrics.map(m => `
+      <tr>
+        <td><span class="tag">${m.platform}</span></td>
+        <td>${m.title}</td>
+        <td>${m.views.toLocaleString()}</td>
+        <td>${m.likes.toLocaleString()}</td>
+        <td>${m.comments.toLocaleString()}</td>
+        <td>${m.shares.toLocaleString()}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('digital-placeholder-note').textContent =
+      'The chart below reflects the same placeholder sample contacts described in the Coalition Space tab — not a full analytics picture yet.';
+
+    renderBarList('channel-chart', Object.entries(data.coalition_stats.by_discovery_channel).map(([label, count]) => ({ label, count })));
+
+    document.getElementById('platforms-list').innerHTML =
+      data.digital_platforms.map(p => `<span class="tag">${p}</span>`).join(' ');
+  }
+
+  function renderCoalition(data){
+    const statsEl = document.getElementById('coalition-stats');
+    statsEl.innerHTML = [
+      { num: data.total_coalition_members, label: 'Total coalition members' },
+      { num: data.coalition_stats.total_contacts, label: 'Sample contacts shown below' },
+      { num: data.local_orgs.length, label: 'Local partner orgs' },
+    ].map(s => `<div class="stat"><div class="num">${s.num}</div><div class="label">${s.label}</div></div>`).join('');
+
+    document.getElementById('coalition-placeholder-note').textContent = data.coalition_note;
+
+    const localityColors = { confirmed_local:'#3f7d5c', possibly_local:'#d98a34', not_local:'#c0524f', unknown:'#a8a8a8' };
+    const localityLabels = { confirmed_local:'Whidbey Island (confirmed)', possibly_local:'Broader Puget Sound (possible)', not_local:'Not local', unknown:'Unknown' };
+    renderBarList('locality-chart', Object.entries(data.coalition_stats.by_locality_status).map(([status, count]) => ({
+      label: localityLabels[status] || status,
+      count,
+      color: localityColors[status] || '#999'
+    })));
+
+    renderBarList('tags-chart', data.coalition_stats.top_tags.map(t => ({ label: t.tag, count: t.count })));
+
+    document.getElementById('orgs-list').innerHTML =
+      data.local_orgs.map(o => `<div class="card" style="margin-bottom:8px;"><h3>${o.name}</h3><p>${o.location}</p></div>`).join('');
+
+    const tbody = document.querySelector('#contacts-table tbody');
+    tbody.innerHTML = data.coalition_contacts.map(c => `
+      <tr>
+        <td><strong>${c.name}</strong>${c.handle ? '<br><span class="sub" style="color:var(--sub); font-size:0.78rem;">@' + c.handle + '</span>' : ''}</td>
+        <td>${c.role}</td>
+        <td><span class="badge ${c.locality_status}">${c.locality_status.replace('_',' ')}</span>${c.region ? '<br><span style="font-size:0.75rem; color:var(--sub);">' + c.region + '</span>' : ''}</td>
+        <td>${c.discovery_channel}</td>
+        <td>${c.tags.map(t => `<span class="tag">${t}</span>`).join('')}</td>
+      </tr>
+    `).join('');
+  }
+
+  // ---------------------------------------------------------------------
+  // Claude chat assistant (direct browser call to the Anthropic API)
+  // ---------------------------------------------------------------------
+  const chatLog = document.getElementById('chat-log');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend = document.getElementById('chat-send');
+  const apiKeyInput = document.getElementById('api-key');
+  document.getElementById('clear-key').addEventListener('click', () => { apiKeyInput.value = ''; });
+
+  const SYSTEM_PROMPT = `You are "Borderlands AI," an assistant embedded in the Project Borderlands community dashboard.
+Project Borderlands is a digital storytelling and community media initiative bridging Indigenous and non-Indigenous
+collaborators through Learning Labs (in-person gatherings), short-form digital storytelling, and a loosely organized
+Coalition network. Ground your answers in relationality, reciprocity, and community accountability rather than
+extractive or purely transactional framing. Keep responses concise and practical (session outlines, story treatment
+notes, outreach language, reflection prompts). Do not claim to speak for Indigenous communities or knowledge holders;
+when relevant, note that specific teachings or protocols should be confirmed with the local knowledge holder
+co-leading that Learning Lab.`;
+
+  function appendMessage(role, text){
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    div.innerHTML = `<div class="who">${role === 'user' ? 'You' : 'Borderlands AI'}</div><div class="body"></div>`;
+    div.querySelector('.body').textContent = text;
+    chatLog.appendChild(div);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return div;
+  }
+
+  async function sendMessage(){
+    const key = apiKeyInput.value.trim();
+    const message = chatInput.value.trim();
+    if (!message) return;
+    if (!key) {
+      appendMessage('assistant', 'Add your Anthropic API key above first — get one at console.anthropic.com.');
+      return;
+    }
+
+    appendMessage('user', message);
+    chatInput.value = '';
+    chatSend.disabled = true;
+    const pending = appendMessage('assistant', 'Thinking…');
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-5',
+          max_tokens: 600,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: message }]
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error('API error ' + res.status + ': ' + errText.slice(0, 300));
+      }
+
+      const json = await res.json();
+      const text = (json.content || []).map(b => b.text || '').join('\n').trim() || '(empty response)';
+      pending.querySelector('.body').textContent = text;
+    } catch (err) {
+      pending.querySelector('.body').textContent =
+        'Could not reach Claude: ' + err.message + '\n\nIf this is a CORS error, that means your browser blocked the direct API call — the fix for a real deployment is to proxy this request through a tiny backend instead of calling api.anthropic.com straight from the page.';
+    } finally {
+      chatSend.disabled = false;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+  }
+
+  chatSend.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+</script>
+
+</body>
+</html>
