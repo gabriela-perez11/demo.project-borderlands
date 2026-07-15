@@ -3,7 +3,7 @@
 <p>
 Hi — I'm Gabi Perez. This repo is a working mockup of a community dashboard for
 <a href="#what-project-borderlands-is">Project Borderlands</a>, a social impact
-initiative I founded. I'm sharing it with the Anthropic team as part of my
+initiative I founded during my time working with 7th Generation Labs. I'm sharing it with the Anthropic team as part of my
 fellowship application.
 </p>
 <hr>
