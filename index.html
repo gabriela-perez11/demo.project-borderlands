@@ -295,7 +295,7 @@
     border-radius:10px;
   }
 
-  /* Note from the designer — modal shown on load so reviewers see context first */
+  /* Note from the designer — modal shown on load so visitors see context first */
   .designer-note-overlay{
     position:fixed;
     inset:0;
@@ -355,14 +355,14 @@
   <div class="designer-note-card">
     <button class="close-btn" id="designer-note-close" aria-label="Close note">&times;</button>
     <h2>A note from the designer</h2>
-    <p>Hi — I'm Gabi Perez. This is a demo project I built for my Claude Corps Fellowship application.</p>
+    <p>Hi — I'm Gabi Perez. Project Borderlands is a concept I developed, and this dashboard is a working prototype of how its three spaces could be run from one place.</p>
 
     <h3>What this dashboard is</h3>
     <p>When I first sketched out Project Borderlands, I drew its three spaces — Physical, Digital, Coalition — as a cycle: what happens on the land feeds the stories that go online, and what grows online should be able to pull people back into the room. That diagram is in the original proposal. This dashboard is the first real attempt at actually building that.</p>
     <p>It's a demo, not a finished product. Some of what's in it is real, pulled straight from the proposal: the founding coalition, the local partner organizations, the Learning Lab concepts, the project's goals. Some of it is placeholder data, clearly labeled as such throughout the app — sample coalition contacts named after native Pacific Northwest flora and fauna, and made-up content performance numbers standing in for analytics that don't exist yet because nothing has launched. I built it this way on purpose: to show what the tool would look like and how it would work, without pretending the program is further along than it is.</p>
 
-    <h3>The honest part</h3>
-    <p>This is quite literally what I had in mind when I first started working on Project Borderlands — a way to hold the physical, digital, and coalition work in one place instead of scattered across a proposal doc, a Google Drive, and my own head. I didn't have the technical background to build it back then. Working through this with Claude is what closed that gap: I went from a diagram on a page to something you can actually click through, in about as long as it would've taken me to just describe the idea to someone else. If I'd had this kind of tool when I was first drafting the project, I think it would have moved a lot faster and a lot further. That's a real part of why I'm applying.</p>
+    <h3>Why a dashboard</h3>
+    <p>This is what I had in mind when I first started working on Project Borderlands — a way to hold the physical, digital, and coalition work in one place instead of scattered across a proposal doc, a Google Drive, and my own head. The Brain Dump tab is part of that: drop in raw notes, sign-up responses, or conversation recaps, and the assistant sorts them into topic groups so patterns across the community are easier to see and act on.</p>
 
     <p class="signoff">— Gabi</p>
     <p style="font-size:0.78rem;">Full write-up, including the file-by-file breakdown, is in <code>README.md</code> in this repo.</p>
@@ -371,7 +371,7 @@
 
 <header>
   <h1>Project Borderlands — Community Dashboard</h1>
-  <p>A working view into the three interconnected spaces of the initiative — Physical, Digital, and Coalition — pulling from cleaned program data, a live weather feed, a Google Form/Sheet intake pipeline, and a Claude-powered planning assistant.</p>
+  <p>A working view into the three interconnected spaces of the initiative — Physical, Digital, and Coalition — pulling from cleaned program data, a live weather feed, a Google Form/Sheet intake pipeline, and a Brain Dump AI assistant that sorts raw input into topic groups.</p>
   <div class="meta-line" id="meta-line">Loading dataset…</div>
   <button class="designer-note-reopen" id="designer-note-reopen">📝 Note from the designer</button>
 </header>
@@ -381,7 +381,7 @@
   <button data-tab="physical">🌲 Physical Space</button>
   <button data-tab="digital">📱 Digital Space</button>
   <button data-tab="coalition">🤝 Coalition Space</button>
-  <button data-tab="assistant">💬 Ask Borderlands AI</button>
+  <button data-tab="assistant">🧠 Brain Dump</button>
 </nav>
 
 <main>
@@ -514,17 +514,17 @@
 
   <!-- ASSISTANT -->
   <section class="panel" id="panel-assistant">
-    <h2 class="space-title">💬 Ask Borderlands AI</h2>
-    <p class="space-sub">A Claude-powered assistant scoped to Project Borderlands — ask it to draft a Learning Lab session outline, tighten a story treatment, or brainstorm outreach language.</p>
+    <h2 class="space-title">🧠 Brain Dump AI Assistant</h2>
+    <p class="space-sub">A place to dump everything — Learning Lab debrief notes, sign-up and survey responses, coalition conversation recaps, half-formed ideas. The assistant streamlines data collection by pulling out the key points and grouping related responses into topics, with follow-ups flagged.</p>
 
     <div class="notice">
-      This calls the real Anthropic API directly from your browser using a key you provide below. The key is kept only in this page's memory for the current session — it is never saved, sent anywhere else, or written to disk. Get a key at <strong>console.anthropic.com</strong>. This pattern is for demos/prototyping; a production version would route through a small backend instead of exposing the key client-side.
+      This calls an AI API directly from your browser using a key you provide below. The key is kept only in this page's memory for the current session — it is never saved, sent anywhere else, or written to disk. This pattern is for prototyping; a production version would route through a small backend instead of exposing the key client-side.
     </div>
 
     <div class="flex-row" style="margin-bottom:14px;">
       <div>
-        <label style="font-size:0.8rem; color:var(--sub);">Anthropic API key</label>
-        <input type="password" id="api-key" placeholder="sk-ant-..." />
+        <label style="font-size:0.8rem; color:var(--sub);">API key</label>
+        <input type="password" id="api-key" placeholder="Paste your API key" />
       </div>
       <div style="flex:0 0 auto;">
         <button class="ghost" id="clear-key">Clear key</button>
@@ -533,14 +533,14 @@
 
     <div class="chat-log" id="chat-log">
       <div class="chat-msg assistant">
-        <div class="who">Borderlands AI</div>
-        <div class="body">Hi — I'm scoped to help with Project Borderlands: Learning Lab session plans, story treatment ideas, outreach messages, and grounding questions. Add your API key above, then ask me something.</div>
+        <div class="who">Brain Dump</div>
+        <div class="body">Paste in anything — notes, form responses, recaps, ideas — and I'll sort it into topic groups with key points and follow-ups. Add your API key above to get started.</div>
       </div>
     </div>
 
     <div class="flex-row">
       <div>
-        <textarea id="chat-input" rows="2" placeholder="e.g. Draft a 90-minute outline for the Intergenerational Cooking Circle Learning Lab"></textarea>
+        <textarea id="chat-input" rows="2" placeholder="e.g. Paste notes from last week&#39;s Learning Lab debrief and sign-up form responses"></textarea>
       </div>
       <div style="flex:0 0 auto;">
         <button class="primary" id="chat-send">Send</button>
@@ -551,7 +551,7 @@
 </main>
 
 <footer>
-  Project Borderlands Community Dashboard — built by Gabi Perez. Data pipeline: <code>clean_merge_data.py</code> → <code>borderlands_data.json</code>. Live integrations: Open-Meteo weather API, Google Sheets CSV export, Anthropic Claude API.
+  Project Borderlands Community Dashboard — built by Gabi Perez. Data pipeline: <code>clean_merge_data.py</code> → <code>borderlands_data.json</code>. Live integrations: Open-Meteo weather API, Google Sheets CSV export, AI assistant API.
 </footer>
 
 <script>
@@ -826,7 +826,7 @@
   }
 
   // ---------------------------------------------------------------------
-  // Claude chat assistant (direct browser call to the Anthropic API)
+  // Brain Dump AI assistant (direct browser call to the AI API)
   // ---------------------------------------------------------------------
   const chatLog = document.getElementById('chat-log');
   const chatInput = document.getElementById('chat-input');
@@ -834,19 +834,22 @@
   const apiKeyInput = document.getElementById('api-key');
   document.getElementById('clear-key').addEventListener('click', () => { apiKeyInput.value = ''; });
 
-  const SYSTEM_PROMPT = `You are "Borderlands AI," an assistant embedded in the Project Borderlands community dashboard.
+  const SYSTEM_PROMPT = `You are the "Brain Dump" assistant embedded in the Project Borderlands community dashboard.
 Project Borderlands is a digital storytelling and community media initiative bridging Indigenous and non-Indigenous
 collaborators through Learning Labs (in-person gatherings), short-form digital storytelling, and a loosely organized
-Coalition network. Ground your answers in relationality, reciprocity, and community accountability rather than
-extractive or purely transactional framing. Keep responses concise and practical (session outlines, story treatment
-notes, outreach language, reflection prompts). Do not claim to speak for Indigenous communities or knowledge holders;
+Coalition network. Users paste unstructured input — meeting and Learning Lab debrief notes, sign-up and survey
+responses, coalition conversation recaps, ideas. Your job is to streamline that data collection: group related input
+under short, clear topic headings (tagging each group Physical, Digital, or Coalition where it fits), summarize the key
+points in each group, note how many responses touch each topic, and end with a short list of follow-ups or open
+questions. Keep people's own words where they matter, don't invent details, and ground your framing in relationality,
+reciprocity, and community accountability rather than extractive or purely transactional language. Do not claim to speak for Indigenous communities or knowledge holders;
 when relevant, note that specific teachings or protocols should be confirmed with the local knowledge holder
 co-leading that Learning Lab.`;
 
   function appendMessage(role, text){
     const div = document.createElement('div');
     div.className = 'chat-msg ' + role;
-    div.innerHTML = `<div class="who">${role === 'user' ? 'You' : 'Borderlands AI'}</div><div class="body"></div>`;
+    div.innerHTML = `<div class="who">${role === 'user' ? 'You' : 'Brain Dump'}</div><div class="body"></div>`;
     div.querySelector('.body').textContent = text;
     chatLog.appendChild(div);
     chatLog.scrollTop = chatLog.scrollHeight;
@@ -858,14 +861,14 @@ co-leading that Learning Lab.`;
     const message = chatInput.value.trim();
     if (!message) return;
     if (!key) {
-      appendMessage('assistant', 'Add your Anthropic API key above first — get one at console.anthropic.com.');
+      appendMessage('assistant', 'Add your API key above first.');
       return;
     }
 
     appendMessage('user', message);
     chatInput.value = '';
     chatSend.disabled = true;
-    const pending = appendMessage('assistant', 'Thinking…');
+    const pending = appendMessage('assistant', 'Sorting…');
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -878,7 +881,7 @@ co-leading that Learning Lab.`;
         },
         body: JSON.stringify({
           model: 'claude-sonnet-5',
-          max_tokens: 600,
+          max_tokens: 1200,
           system: SYSTEM_PROMPT,
           messages: [{ role: 'user', content: message }]
         })
@@ -894,7 +897,7 @@ co-leading that Learning Lab.`;
       pending.querySelector('.body').textContent = text;
     } catch (err) {
       pending.querySelector('.body').textContent =
-        'Could not reach Claude: ' + err.message + '\n\nIf this is a CORS error, that means your browser blocked the direct API call — the fix for a real deployment is to proxy this request through a tiny backend instead of calling api.anthropic.com straight from the page.';
+        'Could not reach the AI assistant: ' + err.message + '\n\nIf this is a CORS error, that means your browser blocked the direct API call — the fix for a real deployment is to proxy this request through a tiny backend instead of calling the API straight from the page.';
     } finally {
       chatSend.disabled = false;
       chatLog.scrollTop = chatLog.scrollHeight;
